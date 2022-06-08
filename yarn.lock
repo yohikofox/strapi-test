@@ -4761,9 +4761,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cms@workspace:packages/cms":
+"cms@workspace:packages/application/cms":
   version: 0.0.0-use.local
-  resolution: "cms@workspace:packages/cms"
+  resolution: "cms@workspace:packages/application/cms"
   dependencies:
     "@strapi/plugin-i18n": 4.1.12
     "@strapi/plugin-users-permissions": 4.1.12
@@ -14905,9 +14905,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web@workspace:packages/web":
+"web@workspace:packages/application/web":
   version: 0.0.0-use.local
-  resolution: "web@workspace:packages/web"
+  resolution: "web@workspace:packages/application/web"
   dependencies:
     "@types/node": 17.0.41
     "@types/react": 18.0.12
