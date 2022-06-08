@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  database:
+    image: hr-for-impact/database:latest
+    container_name: database
+    restart: unless-stopped
+    build:
+      context: ./packages/infrastructure/database
+      dockerfile: Dockerfile
+      args:
+        PG_VERSION: 13.3
+    environment:
+      - POSTGRES_PASSWORD=azertyuiop
+    ports:
+      - 5432:5432
+    volumes:
+      - volume_data:/var/lib/postgresql/data
+    networks:
+      - minisite
+networks:
+  minisite: null
+volumes:
+  volume_data:
+    driver: local
