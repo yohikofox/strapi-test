@@ -1,0 +1,1 @@
+kubectl -v=0 apply -f "./manifest/letsencrypt-issuer.yaml"

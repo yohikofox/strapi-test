@@ -1,5 +1,41 @@
 version: "3.8"
 services:
+  web:
+    image: hr-for-impact/web:latest
+    container_name: web
+    build:
+      context: .
+      dockerfile: ./Dockerfile.web
+    ports:
+      - 3000:3000
+    networks:
+      - minisite
+  cms:
+    image: hr-for-impact/cms:latest
+    container_name: cms
+    stdin_open: true
+    tty: true
+    build:
+      context: .
+      dockerfile: ./Dockerfile.cms
+      args:
+        - NODE_VERSION=14-alpine
+        - STRAPI_VERSION=4.1.12
+        - DATABASE_CLIENT=sqlite
+        - NODE_ENV=production
+        - EXTRA_ARGS=
+    environment:
+      - DATABASE_USERNAME=hr4impact
+      - DATABASE_PASSWORD=hr4impact
+      - DATABASE_HOST=database
+      - APP_KEYS=/co3NSpPqFIaSvR9UzkrXA==,mM/me92dFzpR8VEndKY3yg==
+      - JWT_SECRET=yU5VigybuugsYang+JOCSQ==
+      - API_TOKEN_SALT=nXsa+YAJgEohuWiG+2Xpkw==
+      - ADMIN_JWT_SECRET=caeIVwPTCsXFu9u321/mMw==
+    ports:
+      - 1337:1337
+    networks:
+      - minisite
   database:
     image: hr-for-impact/database:latest
     container_name: database
@@ -17,6 +53,17 @@ services:
       - volume_data:/var/lib/postgresql/data
     networks:
       - minisite
+  script:
+    image: hr-for-impact/script:latest
+    build:
+      context: ./packages/infrastructure/scripts
+      dockerfile: Dockerfile
+    container_name: scripts
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./:/mnt
+      - /var/run/docker.sock:/var/run/docker.sock
 networks:
   minisite: null
 volumes:

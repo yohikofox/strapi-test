@@ -1,0 +1,1 @@
+./packages/infrastructure/scripts/src/04-deploy-helm-packages.sh

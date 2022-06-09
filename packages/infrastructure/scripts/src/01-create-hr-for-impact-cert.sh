@@ -1,0 +1,1 @@
+kubectl apply -f "./packages/infrastructure/scripts/src/manifest/letsencrypt-cert.hr4impact.yaml"

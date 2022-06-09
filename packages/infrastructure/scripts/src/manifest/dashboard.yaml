@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dashboard
+  namespace: traefik-system
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`traefik.hr-for-impact.fr`)
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService

@@ -1,0 +1,32 @@
+FROM node:16.15-alpine as base
+
+WORKDIR /app
+
+FROM base as dependencies
+
+COPY package.json yarn.lock .yarn ./
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/application/web/package.json ./packages/application/web/
+
+RUN yarn install --production --pure-lockfile
+
+FROM dependencies as builder 
+
+COPY packages/ui/ ./packages/ui/
+COPY packages/application/web/ ./packages/application/web/
+
+RUN yarn w web install --pure-lockfile && yarn w web build 
+
+FROM base as runner
+
+ENV NODE_ENV production
+
+COPY --from=builder /app/packages/application/web/public ./public
+COPY --from=builder /app/packages/application/web/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/application/web/node_modules ./node_modules
+COPY --from=builder /app/packages/application/web/package.json ./package.json 
+
+USER node
+
+CMD ["yarn", "start"]

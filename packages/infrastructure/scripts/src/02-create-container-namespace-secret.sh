@@ -1,0 +1,2 @@
+kubectl delete secret registry-secret
+kubectl create secret docker-registry registry-secret --docker-server=rg.fr-par.scw.cloud/thetribe --docker-username=thetribe --docker-password="cdfa1169-b000-4ec6-8af7-eb3ba581c4a4"

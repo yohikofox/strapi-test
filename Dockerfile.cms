@@ -1,0 +1,99 @@
+ARG NODE_VERSION
+
+FROM node:${NODE_VERSION} as base
+FROM base as dependencies
+
+WORKDIR /srv/app
+
+COPY package.json yarn.lock .yarn ./
+
+RUN yarn install --production --pure-lockfile
+
+ARG DATABASE_CLIENT
+ARG STRAPI_VERSION
+ARG DATABASE_CLIENT
+ARG DATABASE_HOST
+ARG DATABASE_PORT
+ARG DATABASE_NAME
+ARG DATABASE_USERNAME
+ARG DATABASE_PASSWORD
+ARG DATABASE_SSL
+ARG EXTRA_ARGS
+
+FROM dependencies as strapi_base
+
+RUN set -ex && apk update && apk add -q --no-cache \
+    build-base \
+    gcc \
+    autoconf \
+    automake \
+    zlib-dev \
+    libpng-dev \
+    nasm \
+    bash \
+    dos2unix \
+    sudo 
+
+RUN mkdir -p /srv/app/packages/application/cms  \
+    && chown 1000:1000 -R /srv/app/packages/application/cms 
+
+WORKDIR /srv/app/packages/application/cms/
+
+RUN yarn global add strapi \
+    && echo "Using strapi $(strapi version)" \
+    && echo "No project found at /srv/app. Creating a new strapi project"
+
+ENV EXTRA_ARGS=${EXTRA_ARGS}
+ENV DOCKER=true
+
+WORKDIR /srv/app/packages/application/cms/
+
+RUN strapi new . \
+    --dbclient=$DATABASE_CLIENT \
+    --dbhost=$DATABASE_HOST \
+    --dbport=$DATABASE_PORT \
+    --dbname=$DATABASE_NAME \
+    --dbusername=$DATABASE_USERNAME \
+    --dbpassword=$DATABASE_PASSWORD \
+    --dbssl=$DATABASE_SSL \
+    $EXTRA_ARGS
+
+COPY packages/application/cms/package.json ./
+
+
+FROM strapi_base as builder 
+
+COPY packages/application/cms/src/admin ./src/admin
+COPY packages/application/cms/src/api ./src/api
+COPY packages/application/cms/src/extensions ./src/extensions
+COPY packages/application/cms/src/bootstrap.js ./src/bootstrap.js
+COPY packages/application/cms/config ./config
+
+
+# COPY packages/application/cms/components ./packages/application/cms/components
+# COPY packages/application/cms/providers ./packages/application/cms/providers
+# COPY packages/application/cms/config/plugins.js ./packages/application/cms/config/plugins.js
+# COPY packages/application/cms/config/functions/bootstrap ./packages/application/cms/config/functions/bootstrap
+
+COPY packages/application/cms/package.json ./package.json
+
+WORKDIR /srv/app
+
+RUN yarn w cms install --production --pure-lockfile && yarn w cms build 
+
+FROM base as runner
+
+ENV NODE_ENV production
+
+RUN yarn global add strapi
+
+WORKDIR /srv/app
+
+COPY --from=builder /srv/app/packages/application/cms ./
+COPY --from=builder /srv/app/node_modules ./node_modules
+
+EXPOSE 1337
+
+# USER node
+
+CMD ["yarn", "start"]

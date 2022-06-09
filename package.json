@@ -5,6 +5,7 @@
     "packages/**/*"
   ],
   "scripts": {
-    "w": "yarn workspace"
+    "w": "yarn workspace",
+    "build:web": "yarn docker build -f Dockerfile.test web"
   }
 }
